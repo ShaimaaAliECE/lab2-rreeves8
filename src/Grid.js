@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 import './App.css';
-
+import logo from './logo192.png'
 function Cell(props){
     return <div className = 'cell'>
                <div className = {props.color}> 
-                   {props.x}, {props.y}
+ 
                </div>
            </div>
 }
@@ -74,34 +74,98 @@ class Grid extends Component {
         let count = 0;
         let operator = '+'
 
-        console.log("exam for " + data.x + "," + data.y)
-
-
         for(let k = 0; k < 2; k++){
             for(let i = 1; i < 4; i++){
-                if(!(data.x + i >= 5)){
-                    nextColor = data.cells[this.operator(operator,data.x,i)][data.y]
+                if(!(data.x + i > 6) && !(data.x-i<0)){
+                    nextColor = data.cells[this.operator(operator,data.x,i)][data.y]  
                     if(nextColor === data.curr){
                         count++; 
-                        console.log(count)
                     }
-                }
-                else{
-                    operator = '-'
-                    break;
-                }
+                    else{
+                        operator = '-'
+                        break;
+                    }
+                }               
+                
             }
-
-            if(count === 3){
+            if(count >= 3){
                 return data.curr;
             }
+            operator = '-'
 
         }
         return ''
     }
 
+    checkDiagonalNegative(data){
+        let nextColor = ''     
+        let count = 0;
+        let operator1 = '+'
+        let operator2 = '-'
+
+        for(let k = 0; k < 2; k++){
+            for(let i = 1; i < 4; i++){
+                if(!(data.x + i > 6) && !(data.y + i > 6) && !(data.x - i < 0) && !(data.y -i < 0)){
+                    nextColor = data.cells[this.operator(operator1,data.x,i)][this.operator(operator2,data.y,i)]
+                    console.log(nextColor + ', ' + data.curr)
+                    if(nextColor === data.curr){
+                        count++;
+                        console.log(count)
+                    }
+                    
+                    else{
+                        operator1 = '-'
+                        operator2 = '+'
+                        break;
+                    }
+                }
+                
+            }
+            if(count >= 3){
+                return data.curr
+            }
+            operator1 = '-'
+            operator2 = '+'
+        }
+        return ''
+    }
+
+    checkDiagonalPositive(data){
+        let nextColor = ''     
+        let count = 0;
+        let operator = '+'
+
+        for(let k = 0; k < 2; k++){
+            for(let i = 1; i < 4; i++){
+                if(!(data.x + i > 6) && !(data.y + i > 6) && !(data.x - i < 0) && !(data.y -i < 0)){
+                    nextColor = data.cells[this.operator(operator,data.x,i)][this.operator(operator,data.y,i)]
+   
+                    if(nextColor === data.curr){
+                        count++;
+                    }
+                    
+                    else{
+                        operator = '-'
+                        break;
+                    }
+                }
+                
+            }
+            if(count >= 3){
+                return data.curr
+            }
+            operator = '-'
+        }
+        return ''
+    }
+
     checkWinner(cells){
-        let winner = ''; 
+        let winner = {
+            UpDown: '',
+            LeftRight: '',
+            diagonalNeg: '',
+            diagonalPos:''
+        }
 
         for(let x = 0; x < 7; x++){
             for(let y = 0; y < 6; y ++){
@@ -114,18 +178,36 @@ class Grid extends Component {
                         x: x,
                         y: y,
                     }
-                    winner = this.checkUpDown(data)
+                    winner.UpDown = this.checkUpDown(data)
 
-                    winner = this.checkLeftRight(data)
+                    winner.LeftRight = this.checkLeftRight(data)
                     
-                    if(winner !== ''){
-                        return winner
+                    winner.diagonalPos = this.checkDiagonalPositive(data)
+
+                    winner.diagonalPos = this.checkDiagonalNegative(data)
+
+                    if(winner.UpDown !== ''){
+                        console.log("updown win")
+                        return winner.UpDown
                     }
-                   
+                    if(winner.LeftRight !== ''){
+                        console.log("left right win")
+                        return winner.LeftRight
+                    }
+
+                    if(winner.diagonalPos !== ''){
+                        console.log("diagonal win")
+                        return winner.diagonalPos
+                    }
+
+                    if(winner.diagonalNeg !== ''){
+                        console.log('diagonal win neg')
+                        return winner.diagonalPos
+                    }
                 }
             }
         }
-        return '';
+        return ''
     }
 
     operator(op, val1, val2){
@@ -136,7 +218,6 @@ class Grid extends Component {
             return val1-val2;
         }
     }
-
 
     printArray(array){
         for(let x = 0; x < 7; x++){
@@ -157,7 +238,6 @@ class Grid extends Component {
                     let newCells = this.state.cells;
                     newCells[columnNum][y] = prevState.playerTurn;
 
-
                     this.setState({
                         cells: newCells,    
                         playerTurn: (prevState.playerTurn === 'red') ? 'black' : 'red',
@@ -168,7 +248,6 @@ class Grid extends Component {
             }
         }
     }
-    
     
     render(){    
         let columns = []
@@ -185,12 +264,14 @@ class Grid extends Component {
              
         return(
             <div>
+                <div className="App-header">
+                    <img src={logo} className="App-logo" alt="logo" />
+                    <h2>Connect4!</h2>
+                </div>
                 <div className = 'grid'>
                     {columns}
                 </div>
-                <div>
-                    {this.state.winner}
-                </div>
+                <div className = 'winner-text'> {this.state.winner} </div>
             </div>
         );
   }
