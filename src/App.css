@@ -40,6 +40,11 @@
   transform: translateY(700px);
 }
 
+.link{
+  left: 300px;
+  text-decoration-color: blanchedalmond;
+}
+
 .grid{
   margin: auto;
   width: 42%;
